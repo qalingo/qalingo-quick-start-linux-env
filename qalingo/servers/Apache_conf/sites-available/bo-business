@@ -1,0 +1,67 @@
+NameVirtualHost bo-business.dev.qalingo.com:80
+NameVirtualHost bo-business.dev.qalingo.com:443
+
+<VirtualHost bo-business.dev.qalingo.com:80>
+    ServerName bo-business.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-bo-business-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-bo-business-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/bo-business-resources/ [NC] 
+    RewriteRule ^/bo-business(.*) $1   [P]
+
+    ProxyPass /assets ! 
+
+    ProxyPass	     /bo-business-resources/ http://localhost:15080/bo-business-resources/ 
+    ProxyPassReverse /bo-business-resources/ http://localhost:15080/bo-business-resources/
+
+    ProxyPassReverseCookiePath /bo-business /
+
+    ProxyPass        / http://localhost:15080/bo-business/
+    ProxyPassReverse / http://localhost:15080/bo-business/
+
+	<Directory proxy:http://localhost:15080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost bo-business.dev.qalingo.com:443>
+    ServerName bo-business.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-bo-business-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-bo-business-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/bo-business-resources/ [NC]
+    RewriteRule ^/bo-business(.*) $1   [P]
+
+    ProxyPass /assets ! 
+
+    ProxyPass	     /bo-business-resources/ http://localhost:15080/bo-business-resources/
+    ProxyPassReverse /bo-business-resources/ http://localhost:15080/bo-business-resources/
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:15080/bo-business/
+    ProxyPassReverse / http://localhost:15080/bo-business/
+
+	<Directory proxy:http://localhost:15080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+

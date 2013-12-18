@@ -1,0 +1,67 @@
+NameVirtualHost bo-technical.dev.qalingo.com:80
+NameVirtualHost bo-technical.dev.qalingo.com:443
+
+<VirtualHost bo-technical.dev.qalingo.com:80>
+    ServerName bo-technical.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-bo-technical-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-bo-technical-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/bo-technical-resources/ [NC]
+    RewriteRule ^/bo-technical(.*) $1   [P]
+
+    ProxyPass /assets ! 
+
+    ProxyPass	     /bo-technical-resources/ http://localhost:17080/bo-technical-resources/ 
+    ProxyPassReverse /bo-technical-resources/ http://localhost:17080/bo-technical-resources/
+
+    ProxyPassReverseCookiePath /bo-technical /
+
+    ProxyPass        / http://localhost:17080/bo-technical/
+    ProxyPassReverse / http://localhost:17080/bo-technical/
+
+	<Directory proxy:http://localhost:17080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost bo-technical.dev.qalingo.com:443>
+    ServerName bo-technical.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-bo-technical-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-bo-technical-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/bo-technical-resources/ [NC]
+    RewriteRule ^/bo-technical(.*) $1   [P]
+
+    ProxyPass /assets ! 
+
+    ProxyPass	     /bo-technical-resources/ http://localhost:17080/bo-technical-resources/
+    ProxyPassReverse /bo-technical-resources/ http://localhost:17080/bo-technical-resources/
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:17080/bo-technical/
+    ProxyPassReverse / http://localhost:17080/bo-technical/
+
+	<Directory proxy:http://localhost:17080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+

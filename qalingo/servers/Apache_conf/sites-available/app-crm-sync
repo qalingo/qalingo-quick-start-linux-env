@@ -1,0 +1,61 @@
+NameVirtualHost app-crm-sync.dev.qalingo.com:80
+NameVirtualHost app-crm-sync.dev.qalingo.com:443
+
+<VirtualHost app-crm-sync.dev.qalingo.com:80>
+    ServerName app-crm-sync.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-app-crm-sync-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-app-crm-sync-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteRule ^/app-crm-sync/(.*) $1   [P]
+
+    ProxyPass	     /app-crm-sync-resources/ http://localhost:11080/app-crm-sync-resources/ 
+    ProxyPassReverse /app-crm-sync-resources/ http://localhost:11080/app-crm-sync-resources/
+
+    ProxyPassReverseCookiePath /app-crm-sync /
+
+    ProxyPass        / http://localhost:11080/app-crm-sync/
+    ProxyPassReverse / http://localhost:11080/app-crm-sync/
+
+	<Directory proxy:http://localhost:11080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost app-crm-sync.dev.qalingo.com:443>
+    ServerName app-crm-sync.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-app-crm-sync-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-app-crm-sync-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteRule ^/app-crm-sync/(.*) $1   [P]
+
+    ProxyPass	     /app-crm-sync-resources/ http://localhost:11080/app-crm-sync-resources/
+    ProxyPassReverse /app-crm-sync-resources/ http://localhost:11080/app-crm-sync-resources/
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:11080/app-crm-sync/
+    ProxyPassReverse / http://localhost:11080/app-crm-sync/
+
+	<Directory proxy:http://localhost:11080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+

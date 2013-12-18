@@ -1,0 +1,55 @@
+NameVirtualHost remote-ws.dev.qalingo.com:80
+NameVirtualHost remote-ws.dev.qalingo.com:443
+
+<VirtualHost remote-ws.dev.qalingo.com:80>
+    ServerName remote-ws.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-remote-ws-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-remote-ws-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteRule ^/remote-ws/(.*) $1   [P]
+
+    ProxyPassReverseCookiePath /remote-ws /
+
+    ProxyPass        / http://localhost:23080/remote-ws/
+    ProxyPassReverse / http://localhost:23080/remote-ws/
+
+	<Directory proxy:http://localhost:23080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost remote-ws.dev.qalingo.com:443>
+    ServerName remote-ws.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-remote-ws-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-remote-ws-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteRule ^/remote-rest/(.*) $1   [P]
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:23080/remote-ws/
+    ProxyPassReverse / http://localhost:23080/remote-ws/
+
+	<Directory proxy:http://localhost:23080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+

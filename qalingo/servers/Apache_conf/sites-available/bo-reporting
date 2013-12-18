@@ -1,0 +1,67 @@
+NameVirtualHost bo-reporting.dev.qalingo.com:80
+NameVirtualHost bo-reporting.dev.qalingo.com:443
+
+<VirtualHost bo-reporting.dev.qalingo.com:80>
+    ServerName bo-reporting.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-bo-reporting-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-bo-reporting-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/bo-reporting-resources/ [NC]
+    RewriteRule ^/bo-reporting(.*) $1   [P]
+
+    ProxyPass /assets ! 
+
+    ProxyPass	     /bo-reporting-resources/ http://localhost:16080/bo-reporting-resources/ 
+    ProxyPassReverse /bo-reporting-resources/ http://localhost:16080/bo-reporting-resources/
+
+    ProxyPassReverseCookiePath /bo-reporting /
+
+    ProxyPass        / http://localhost:16080/bo-reporting/
+    ProxyPassReverse / http://localhost:16080/bo-reporting/
+
+	<Directory proxy:http://localhost:16080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost bo-reporting.dev.qalingo.com:443>
+    ServerName bo-reporting.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-bo-reporting-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-bo-reporting-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/bo-reporting-resources/ [NC]
+    RewriteRule ^/bo-reporting(.*) $1   [P]
+
+    ProxyPass /assets ! 
+
+    ProxyPass	     /bo-reporting-resources/ http://localhost:16080/bo-reporting-resources/
+    ProxyPassReverse /bo-reporting-resources/ http://localhost:16080/bo-reporting-resources/
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:16080/bo-reporting/
+    ProxyPassReverse / http://localhost:16080/bo-reporting/
+
+	<Directory proxy:http://localhost:16080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+

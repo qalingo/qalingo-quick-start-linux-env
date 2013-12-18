@@ -1,0 +1,61 @@
+NameVirtualHost app-business.dev.qalingo.com:80
+NameVirtualHost app-business.dev.qalingo.com:443
+
+<VirtualHost app-business.dev.qalingo.com:80>
+    ServerName app-business.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-app-business-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-app-business-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteRule ^/app-business/(.*) $1   [P]
+
+    ProxyPass	     /app-business-resources/ http://localhost:13080/app-business-resources/ 
+    ProxyPassReverse /app-business-resources/ http://localhost:13080/app-business-resources/
+
+    ProxyPassReverseCookiePath /app-business /
+
+    ProxyPass        / http://localhost:13080/app-business/
+    ProxyPassReverse / http://localhost:13080/app-business/
+
+	<Directory proxy:http://localhost:13080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost app-business.dev.qalingo.com:443>
+    ServerName app-business.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-app-business-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-app-business-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteRule ^/app-business/(.*) $1   [P]
+
+    ProxyPass	     /app-business-resources/ http://localhost:13080/app-business-resources/
+    ProxyPassReverse /app-business-resources/ http://localhost:13080/app-business-resources/
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:13080/app-business/
+    ProxyPassReverse / http://localhost:13080/app-business/
+
+	<Directory proxy:http://localhost:13080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+

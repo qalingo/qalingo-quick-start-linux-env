@@ -1,0 +1,67 @@
+NameVirtualHost fo-mcommerce.dev.qalingo.com:80
+NameVirtualHost fo-mcommerce.dev.qalingo.com:443
+
+<VirtualHost fo-mcommerce.dev.qalingo.com:80>
+    ServerName fo-mcommerce.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-fo-mcommerce-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-fo-mcommerce-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/fo-mcommerce-resources/ [NC]
+    RewriteRule ^/fo-mcommerce(.*) $1   [P]
+
+    ProxyPass /assets !
+
+    ProxyPass	     /fo-mcommerce-resources/ http://localhost:18080/fo-mcommerce-resources/ 
+    ProxyPassReverse /fo-mcommerce-resources/ http://localhost:18080/fo-mcommerce-resources/
+
+    ProxyPassReverseCookiePath /fo-mcommerce /
+
+    ProxyPass        / http://localhost:18080/fo-mcommerce/
+    ProxyPassReverse / http://localhost:18080/fo-mcommerce/
+
+	<Directory proxy:http://localhost:18080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost fo-mcommerce.dev.qalingo.com:443>
+    ServerName fo-mcommerce.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-fo-mcommerce-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-fo-mcommerce-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/fo-mcommerce-resources/ [NC]
+    RewriteRule ^/fo-mcommerce(.*) $1   [P]
+
+    ProxyPass /assets !
+
+    ProxyPass	     /fo-mcommerce-resources/ http://localhost:18080/fo-mcommerce-resources/
+    ProxyPassReverse /fo-mcommerce-resources/ http://localhost:18080/fo-mcommerce-resources/
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:18080/fo-mcommerce/
+    ProxyPassReverse / http://localhost:18080/fo-mcommerce/
+
+	<Directory proxy:http://localhost:18080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+

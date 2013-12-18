@@ -1,0 +1,61 @@
+NameVirtualHost app-cms-sync.dev.qalingo.com:80
+NameVirtualHost app-cms-sync.dev.qalingo.com:443
+
+<VirtualHost app-cms-sync.dev.qalingo.com:80>
+    ServerName app-cms-sync.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-app-cms-sync-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-app-cms-sync-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteRule ^/app-cms-sync/(.*) $1   [P]
+
+    ProxyPass	     /app-cms-sync-resources/ http://localhost:10080/app-cms-sync-resources/ 
+    ProxyPassReverse /app-cms-sync-resources/ http://localhost:10080/app-cms-sync-resources/
+
+    ProxyPassReverseCookiePath /app-cms-sync /
+
+    ProxyPass        / http://localhost:10080/app-cms-sync/
+    ProxyPassReverse / http://localhost:10080/app-cms-sync/
+
+	<Directory proxy:http://localhost:10080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost app-cms-sync.dev.qalingo.com:443>
+    ServerName app-cms-sync.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-app-cms-sync-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-app-cms-sync-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteRule ^/app-cms-sync/(.*) $1   [P]
+
+    ProxyPass	     /app-cms-sync-resources/ http://localhost:10080/app-cms-sync-resources/
+    ProxyPassReverse /app-cms-sync-resources/ http://localhost:10080/app-cms-sync-resources/
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:10080/app-cms-sync/
+    ProxyPassReverse / http://localhost:10080/app-cms-sync/
+
+	<Directory proxy:http://localhost:10080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+

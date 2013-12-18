@@ -1,0 +1,67 @@
+NameVirtualHost fo-prehome.dev.qalingo.com:80
+NameVirtualHost fo-prehome.dev.qalingo.com:443
+
+<VirtualHost fo-prehome.dev.qalingo.com:80>
+    ServerName fo-prehome.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/qalingo-fo-prehome-demo.error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/qalingo-fo-prehome-demo.access.log" common
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/fo-prehome-resources/ [NC]
+    RewriteRule ^/fo-prehome(.*) $1   [P]
+
+    ProxyPass /assets !
+
+    ProxyPass	     /fo-prehome-resources/ http://localhost:19080/fo-prehome-resources/ 
+    ProxyPassReverse /fo-prehome-resources/ http://localhost:19080/fo-prehome-resources/
+
+    ProxyPassReverseCookiePath /fo-prehome /
+
+    ProxyPass        / http://localhost:19080/fo-prehome/
+    ProxyPassReverse / http://localhost:19080/fo-prehome/
+
+	<Directory proxy:http://localhost:19080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+
+</VirtualHost>
+
+<VirtualHost fo-prehome.dev.qalingo.com:443>
+    ServerName fo-prehome.dev.qalingo.com
+    ServerAdmin contact@yourdomain.com
+
+    ErrorLog "/home/tomcat/servers/apache/logs/ssl-qalingo-fo-prehome-demo-error.log"
+    CustomLog "/home/tomcat/servers/apache/logs/ssl-qalingo-fo-prehome-demo-access.log" common
+    SSLProxyEngine on
+    SSLEngine on
+
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/fo-prehome-resources/ [NC]
+    RewriteRule ^/fo-prehome(.*) $1   [P]
+
+    ProxyPass /assets !
+
+    ProxyPass	     /fo-prehome-resources/ http://localhost:19080/fo-prehome-resources/
+    ProxyPassReverse /fo-prehome-resources/ http://localhost:19080/fo-prehome-resources/
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        / http://localhost:19080/fo-prehome/
+    ProxyPassReverse / http://localhost:19080/fo-prehome/
+
+	<Directory proxy:http://localhost:19080/*>
+			Order deny,allow
+			Allow from all
+	</Directory>
+</VirtualHost>
+
